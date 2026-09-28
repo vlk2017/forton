@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>МОЙ ТЬЮТОР — персональный AI‑наставник</title>
+<style>
+:root{
+  --bg:#0e1116; --panel:#151a21; --panel2:#1b222c; --text:#f5f7fb; --muted:#9da8b7;
+  --line:#2a3441; --accent:#f2b84b; --good:#58c68d; --bad:#ef7373; --blue:#79aef7;
+  --shadow:0 16px 50px rgba(0,0,0,.28); --r:18px;
+}
+:root.light{
+  --bg:#f5f6f8; --panel:#ffffff; --panel2:#f0f3f6; --text:#121722; --muted:#657083;
+  --line:#dfe4ea; --accent:#b97700; --good:#138a55; --bad:#c13a3a; --blue:#2f72d6;
+  --shadow:0 12px 36px rgba(29,42,60,.10);
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit} button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+.sidebar{border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px)}
+.brand{font-weight:900;letter-spacing:.04em;font-size:18px;margin-bottom:28px}.brand span{color:var(--accent)}
+.nav{display:grid;gap:8px}.nav button,.mobile-nav button{border:0;background:transparent;color:var(--muted);padding:12px 13px;border-radius:12px;text-align:left}
+.nav button.active,.nav button:hover,.mobile-nav button.active{background:var(--panel2);color:var(--text)}
+.sidebar-foot{position:absolute;left:16px;right:16px;bottom:18px}.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
+main{padding:30px;max-width:1200px;width:100%;margin:0 auto}.screen{display:none}.screen.active{display:block}
+h1,h2,h3,p{margin-top:0}.kicker{color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:24px}.hero h1{font-size:clamp(28px,4vw,48px);line-height:1.02;margin-bottom:8px}.muted{color:var(--muted)}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}.card.flat{box-shadow:none}
+.card h3{margin-bottom:8px}.metric{font-size:30px;font-weight:850}.metric small{font-size:13px;color:var(--muted);font-weight:600}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 14px;border-radius:12px;font-weight:750}.btn:hover{transform:translateY(-1px)}.btn.primary{background:var(--accent);color:#15120a;border-color:transparent}.btn.ghost{background:transparent}.btn.danger{color:var(--bad)}.btn.good{color:var(--good)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.domain{min-height:138px;display:flex;flex-direction:column;justify-content:space-between}.domain strong{font-size:17px}.domain .icon{font-size:25px}
+.progress{height:9px;background:var(--panel2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}.progress>i{display:block;height:100%;background:var(--accent);width:0}
+.bars{height:110px;display:flex;align-items:end;gap:8px;padding-top:8px}.bar{flex:1;min-width:8px;border-radius:7px 7px 2px 2px;background:var(--blue);opacity:.8}.bar.zero{opacity:.12;height:3px!important}
+.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}.badge.good{color:var(--good)}.badge.bad{color:var(--bad)}.badge.blue{color:var(--blue)}
+.field{display:grid;gap:7px}.field label{font-size:13px;color:var(--muted);font-weight:700}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:12px 13px;outline:none}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.topline{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}.mode-switch{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:4px}.mode-switch button{border:0;background:transparent;color:var(--muted);padding:9px 13px;border-radius:10px}.mode-switch button.active{background:var(--panel);color:var(--text)}
+.session{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}.chat{min-height:580px;display:flex;flex-direction:column}.messages{display:flex;flex-direction:column;gap:10px;flex:1;overflow:auto;max-height:520px;padding-right:4px}.msg{max-width:86%;padding:12px 14px;border-radius:15px;line-height:1.45;border:1px solid var(--line);white-space:pre-wrap}.msg.tutor{background:var(--panel2);align-self:flex-start}.msg.user{background:color-mix(in srgb,var(--blue) 18%,var(--panel));align-self:flex-end}.msg.feedback{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}.composer{display:flex;gap:8px;margin-top:12px}.composer textarea{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:13px;padding:12px;min-height:48px;max-height:130px;resize:vertical}.side-list{display:grid;gap:10px}.topic-row{display:grid;gap:6px;padding:12px;border-radius:13px;background:var(--panel2);border:1px solid var(--line)}.topic-row .row{display:flex;justify-content:space-between;gap:8px}
+.review-card{max-width:720px;margin:0 auto}.review-q{font-size:24px;line-height:1.25}.reveal{padding:14px;border-radius:12px;background:var(--panel2);border:1px dashed var(--line);margin:12px 0}
+.table{display:grid;gap:10px}.tr{display:grid;grid-template-columns:1.5fr .6fr .6fr .7fr;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.tr.head{font-size:12px;color:var(--muted);font-weight:800}
+.onboard{position:fixed;inset:0;background:rgba(5,8,12,.78);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.onboard.show{display:flex}.modal{width:min(640px,100%);background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}.stepdots{display:flex;gap:6px;margin-bottom:18px}.dot{height:5px;flex:1;background:var(--line);border-radius:999px}.dot.on{background:var(--accent)}
+.notice{border-left:3px solid var(--accent);padding:10px 12px;background:var(--panel2);border-radius:8px;color:var(--muted);font-size:13px}.mobile-nav{display:none}
+.small{font-size:13px}.tiny{font-size:11px}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:30}.toast.show{display:block}
+@media(max-width:900px){
+ .app{display:block}.sidebar{display:none}main{padding:18px 14px 84px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:15;padding:6px max(8px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));justify-content:space-around}
+ .mobile-nav button{text-align:center;font-size:11px;padding:8px 6px}.g4,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}.session{grid-template-columns:1fr}.session aside{order:-1}.hero{align-items:flex-start;flex-direction:column}.tr{grid-template-columns:1fr .45fr .45fr}.tr>*:nth-child(4){display:none}
+}
+@media(max-width:520px){.g4,.g3{grid-template-columns:1fr}.card{padding:15px}.msg{max-width:93%}.composer{flex-direction:column}.composer .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">МОЙ <span>ТЬЮТОР</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot"><span class="chip">● Demo engine · local</span></div>
+  </aside>
+  <main>
+    <section id="dashboard" class="screen active"></section>
+    <section id="session" class="screen"></section>
+    <section id="review" class="screen"></section>
+    <section id="knowledge" class="screen"></section>
+    <section id="settings" class="screen"></section>
+  </main>
+</div>
+<nav class="mobile-nav" id="mobileNav"></nav>
+<div class="onboard" id="onboard"><div class="modal" id="onboardCard"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY="moy-tutor-self-contained-v1";
+const domains=[
+["business","💼","Бизнес и продажи","Ценность, переговоры, воронка"],
+["construction","🦺","Стройка / прораб","Сметы, сроки, контроль"],
+["ai","🧠","AI и продукты","LLM, агенты, продуктовые циклы"],
+["mir","🕸️","MIR / UZEL","Графы, evidence, provenance"],
+["writing","✍️","Письмо и литература","Структура, сцена, голос"],
+["finance","₽","Финансовая грамотность","Риск, деньги, решения"],
+["general","🌍","Общая эрудиция","История, наука, идеи"],
+["custom","✨","Своя тема","Любая задача → микро‑курс"]
+];
+const demoLesson={
+ id:"demo-ai-agent", title:"Как устроен AI‑агент", goal:"Понять цикл агента и отличать агента от обычного LLM‑чата",
+ topic:"AI‑агент против LLM‑чата",
+ steps:[
+  {type:"q",topic:"ai-agent-basics",q:"Коротко: чем, по‑твоему, AI‑агент отличается от обычного чата с LLM? Одно‑два предложения, своими словами.",keys:["цель","действ","инструмент","цикл","шаг","сам"],answer:"Агент получает цель, планирует, вызывает инструменты, наблюдает результат и повторяет цикл до критерия остановки.",hints:["Подумай не про текст ответа, а про то, что система делает после ответа.","Чат отвечает один раз. Агент работает итерациями. Что ему нужно кроме текста?","Агент = цель + план → действие инструментом → наблюдение → оценка → повтор/остановка."]},
+  {type:"explain",topic:"ai-agent-loop",chunks:["Цикл агента: цель → план → действие инструментом → наблюдение → оценка → повтор или остановка.","Инструменты — это «руки»: поиск, база, API, код. Без инструментов модель может только говорить.","Память хранит контекст задачи и результаты предыдущих шагов."],q:"Применение: тебе нужно найти 20 потенциальных клиентов. Где здесь действие инструментом, а где наблюдение?",keys:["поиск","инструмент","провер","фильтр","наблюд","критер"],answer:"Поиск и обогащение — действия инструментами; проверка соответствия и подсчёт валидных лидов — наблюдение/оценка; остановка — когда есть 20 подтверждённых.",hints:["Начни с критерия «готово».","Для каждого шага спроси: модель думает или вызывает что‑то наружу?","Поиск — действие; подсчёт и проверка — наблюдение/оценка."],alt:"Смета: чат расскажет, как проверить. Агент откроет файл, пересчитает позиции и выдаст расхождения."},
+  {type:"explain",topic:"ai-agent-risks",chunks:["Главный риск агента — накопление ошибки: неверное наблюдение на раннем шаге заражает весь дальнейший результат.","Поэтому нужны evidence и provenance: вывод должен вести к источнику и промежуточному артефакту."],q:"Как поймать ошибку агента на шаге 2, если итог видишь только в конце? Назови один механизм.",keys:["лог","источник","evidence","провер","трасс","промежуточ"],answer:"Логировать промежуточные наблюдения с источниками и не пропускать шаг дальше без проверки.",hints:["Что должно остаться после каждого шага?","Нужен проверяемый след действия и источника.","Логи + provenance + гейт качества между шагами."]},
+  {type:"quiz",topic:"ai-agent-basics",questions:[
+    {q:"1/3 — Воспроизведение: назови четыре элемента цикла агента.",keys:["план","действ","наблюд","оцен"],answer:"План → действие → наблюдение → оценка."},
+    {q:"2/3 — Применение: для агента проверки смет что будет инструментом, а что критерием остановки?",keys:["файл","смет","расч","расхожд","критер"],answer:"Инструмент — чтение/пересчёт сметы. Критерий — все позиции проверены, расхождения выписаны."},
+    {q:"3/3 — Перенос: где агент хуже обычного чата? Одна ситуация и причина.",keys:["прост","быстр","дорог","риск","ошиб"],answer:"В простой одношаговой задаче агент избыточен: он медленнее, дороже и добавляет точки отказа."}
+  ]}
+ ]
+};
+function defaultState(){
+ const now=Date.now(),d=86400000;
+ return {
+  theme:"dark", profile:{onboarded:false,goal:"",why:"",level:5,minutes:20,style:"mixed"},
+  streak:3,lastActive:null,screen:"dashboard",mode:"learn",
+  topics:{
+   "ai-agent-basics":{title:"AI‑агент против LLM‑чата",domain:"ai",baseline:20,mastery:42,confidence:55,attempts:3,errors:["Агент описан как «умный чат» без цикла действий"],next:now+d,evidence:[]},
+   "ai-agent-loop":{title:"Цикл агента",domain:"ai",baseline:10,mastery:28,confidence:40,attempts:2,errors:["Пропущено наблюдение"],next:now-d,evidence:[]},
+   "business-core":{title:"Продажа через ценность",domain:"business",baseline:35,mastery:61,confidence:70,attempts:4,errors:["Скидка вместо вопроса"],next:now+3*d,evidence:[]},
+   "construction-core":{title:"Смета и контроль работ",domain:"construction",baseline:55,mastery:74,confidence:80,attempts:5,errors:[],next:now+7*d,evidence:[]}
+  },
+  cards:[
+   {id:"c1",topic:"ai-agent-loop",title:"Цикл агента",q:"Назови четыре элемента цикла агента по порядку.",keys:["план","действ","наблюд","оцен"],answer:"План → действие → наблюдение → оценка.",interval:0,due:now-1000},
+   {id:"c2",topic:"ai-agent-basics",title:"AI‑агент",q:"Почему без инструментов агент остаётся в сущности чатом?",keys:["инструмент","действ","внешн"],answer:"Без инструментов модель не может действовать во внешнем мире, только описывать действия.",interval:1,due:now-1000}
+  ],
+  days:[18,28,0,22,35,15,0].map((m,i)=>({minutes:m,mastery:[25,30,30,38,44,49,49][i]})),
+  session:null,customCourse:null
+ };
+}
+let state=load();
+function load(){try{return {...defaultState(),...JSON.parse(localStorage.getItem(KEY)||"null")}}catch(e){return defaultState()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function esc(s=""){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+function avgMastery(){let a=Object.values(state.topics);return Math.round(a.reduce((s,t)=>s+t.mastery,0)/(a.length||1))}
+function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
+function navTo(id){state.screen=id;save();document.querySelectorAll(".screen").forEach(x=>x.classList.toggle("active",x.id===id));renderNav(); if(id==="dashboard")renderDashboard();if(id==="session")renderSession();if(id==="review")renderReview();if(id==="knowledge")renderKnowledge();if(id==="settings")renderSettings()}
+const navItems=[["dashboard","⌂","Главная"],["session","▶","Учиться"],["review","↻","Повторить"],["knowledge","◎","Карта"],["settings","⚙","Настройки"]];
+function renderNav(){
+ const html=navItems.map(([id,ic,t])=>`<button class="${state.screen===id?"active":""}" onclick="navTo('${id}')">${ic} &nbsp; ${t}</button>`).join("");
+ document.getElementById("nav").innerHTML=html;document.getElementById("mobileNav").innerHTML=navItems.map(([id,ic,t])=>`<button class="${state.screen===id?"active":""}" onclick="navTo('${id}')"><div>${ic}</div>${t}</button>`).join("");
+}
+function setTheme(){
+ document.documentElement.classList.toggle("light",state.theme==="light");
+}
+function renderDashboard(){
+ const due=state.cards.filter(c=>c.due<=Date.now()).length;
+ const weak=Object.values(state.topics).sort((a,b)=>a.mastery-b.mastery)[0];
+ let bars=state.days.map(x=>`<div class="bar ${x.minutes?"":"zero"}" style="height:${Math.max(3,x.minutes*2.4)}px" title="${x.minutes} мин"></div>`).join("");
+ document.getElementById("dashboard").innerHTML=`
+ <div class="hero"><div><div class="kicker">Персональный учебный контур</div><h1>Не читать. <span style="color:var(--accent)">Осваивать.</span></h1><p class="muted">Тьютор засчитывает знание только после твоего ответа и применения.</p></div><div class="actions"><button class="btn ghost" onclick="toggleTheme()">☼ / ☾</button><button class="btn primary" onclick="startDemo()">Продолжить обучение →</button></div></div>
+ <div class="grid g4">
+  <div class="card flat"><div class="muted small">Mastery</div><div class="metric">${avgMastery()}<small>%</small></div></div>
+  <div class="card flat"><div class="muted small">Серия</div><div class="metric">${state.streak}<small> дня</small></div></div>
+  <div class="card flat"><div class="muted small">К повторению</div><div class="metric">${due}<small> карточки</small></div></div>
+  <div class="card flat"><div class="muted small">Сегодня</div><div class="metric">${state.profile.minutes}<small> мин цель</small></div></div>
+ </div>
+ <div class="grid g2" style="margin-top:16px">
+  <div class="card"><h3>Слабое место дня</h3><div class="muted">${esc(weak.title)}</div><div class="progress" style="margin:12px 0"><i style="width:${weak.mastery}%"></i></div><div class="actions"><button class="btn" onclick="navTo('review')">Потренировать</button></div></div>
+  <div class="card"><h3>Последние 7 дней</h3><div class="bars">${bars}</div><div class="muted tiny">Высота = минуты активной практики, не время “в чате”.</div></div>
+ </div>
+ <h2 style="margin-top:26px">Направления</h2>
+ <div class="grid g4">${domains.map(d=>`<div class="card domain flat"><div><div class="icon">${d[1]}</div><strong>${d[2]}</strong><div class="muted small" style="margin-top:5px">${d[3]}</div></div><button class="btn ghost" onclick="pickDomain('${d[0]}')">Открыть →</button></div>`).join("")}</div>
+ <div class="card" style="margin-top:22px"><div class="kicker">Из задачи в курс</div><h2>Вставь реальную проблему</h2><p class="muted">Тьютор превратит её в микро‑курс и оставит финалом практический артефакт.</p><div class="field"><textarea id="taskInput" placeholder="Например: мне нужно понять, как устроен мультиагентный поиск клиентов"></textarea></div><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="taskToCourse()">Собрать микро‑курс</button></div><div id="coursePreview"></div></div>`;
+}
+function pickDomain(id){ if(id==="custom"){document.getElementById("taskInput")?.focus();window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});return} state.profile.goal=domains.find(d=>d[0]===id)?.[2]||"";save();startDemo() }
+function taskToCourse(){
+ const v=(document.getElementById("taskInput").value||"").trim(); if(v.length<8){toast("Опиши задачу чуть конкретнее");return}
+ const words=v.toLowerCase();
+ const focus=words.includes("клиент")?"поиск и квалификация клиентов":words.includes("агент")?"архитектура агента":words.includes("смет")?"проверка смет":words.includes("текст")||words.includes("роман")?"работа с текстом":"решение задачи";
+ state.customCourse={title:v,steps:[
+  `1. Диагностика: что ты уже знаешь про ${focus}?`,
+  `2. Карта понятий: 3–5 вещей, без которых задача не решается.`,
+  `3. Практика: применить каждую вещь к твоему кейсу.`,
+  `4. Проверка переноса: решить похожую задачу без подсказки.`,
+  `5. Артефакт: готовый план/решение по исходной задаче.`
+ ]}; save();
+ document.getElementById("coursePreview").innerHTML=`<div class="notice" style="margin-top:12px"><b>Микро‑курс готов:</b><br>${state.customCourse.steps.map(esc).join("<br>")}<br><br><button class="btn" onclick="startCustom()">Начать шаг 1</button></div>`;
+}
+function startCustom(){
+ const c=state.customCourse;if(!c)return;
+ state.session={kind:"custom",index:0,hint:0,messages:[{role:"tutor",text:`Твоя задача: «${c.title}».\n\nШаг 1 — диагностика. Что ты уже умеешь/понимаешь по этой теме? Назови 2–3 вещи и одно место, где сейчас застреваешь.`}],answers:0};state.mode="learn";save();navTo("session")
+}
+function startDemo(){
+ state.session={kind:"demo",step:0,quiz:0,hint:0,revealed:false,answers:0,messages:[{role:"tutor",text:`Цель: ${demoLesson.goal}\n\n${demoLesson.steps[0].q}`} ]};state.mode="learn";save();navTo("session")
+}
+function renderSession(){
+ if(!state.session) startDemo();
+ const s=state.session||{};
+ let topics=Object.values(state.topics).map(t=>`<div class="topic-row"><div class="row"><b>${esc(t.title)}</b><span>${t.mastery}%</span></div><div class="progress"><i style="width:${t.mastery}%"></i></div><div class="muted tiny">${t.attempts} попыток · уверенность ${t.confidence}%</div></div>`).join("");
+ document.getElementById("session").innerHTML=`
+ <div class="topline"><div><div class="kicker">Учебная сессия</div><h2 style="margin:4px 0">${s.kind==="custom"?esc(state.customCourse?.title||"Своя задача"):demoLesson.title}</h2></div><div class="mode-switch"><button class="${state.mode==="learn"?"active":""}" onclick="setMode('learn')">Учусь</button><button class="${state.mode==="do"?"active":""}" onclick="setMode('do')">Делаем</button></div></div>
+ <div class="session">
+  <div class="card chat">
+    <div class="messages" id="messages">${(s.messages||[]).map(m=>`<div class="msg ${m.role} ${m.kind==="feedback"?"feedback":""}">${esc(m.text)}</div>`).join("")}</div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn ghost" onclick="hint()">Намёк</button>
+      <button class="btn ghost" onclick="otherExample()">Другой пример</button>
+      <button class="btn ghost" onclick="checkMe()">Проверить меня</button>
+      <button class="btn ghost" onclick="fullExplain()">Объясни полностью</button>
+    </div>
+    <div class="composer"><textarea id="answerBox" placeholder="${state.mode==="learn"?"Напиши свой ход мысли…":"Опиши результат, который нужно получить…"}"></textarea><button class="btn primary" onclick="submitAnswer()">Отправить</button></div>
+  </div>
+  <aside class="card"><div class="kicker">Карта знаний</div><div class="side-list" style="margin-top:12px">${topics}</div></aside>
+ </div>`;
+ setTimeout(()=>{let m=document.getElementById("messages");if(m)m.scrollTop=m.scrollHeight},0)
+}
+function setMode(m){state.mode=m;save(); if(m==="do"){push("tutor","Режим «Делаем»: я помогу довести задачу до результата и после каждого шага отмечу, чему ты научился. Опиши конкретный результат.")}renderSession()}
+function currentStep(){
+ const s=state.session;if(!s||s.kind!=="demo")return null;
+ let st=demoLesson.steps[s.step]; if(st?.type==="quiz") return st.questions[s.quiz]; return st;
+}
+function push(role,text,kind){state.session.messages.push({role,text,kind});save()}
+function normalize(x){return x.toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9\s]/gi," ")}
+function evalAnswer(text,keys){
+ const t=normalize(text),hits=keys.filter(k=>t.includes(normalize(k))), ratio=hits.length/(keys.length||1);
+ if(text.trim().split(/\s+/).length<3)return {v:"wrong",delta:-3,fb:"Ответ слишком короткий — не видно хода мысли. Добавь одно полное предложение: что главное и почему?"};
+ if(ratio>=.5)return {v:"correct",delta:14,fb:`Засчитано: ты зацепил ${hits.slice(0,2).join(", ")}. Теперь двигаемся дальше.`};
+ if(ratio>0)return {v:"partial",delta:6,fb:`Часть механизма есть (${hits[0]}), но не хватает ключевого звена. Дострой ещё одним предложением.`};
+ return {v:"wrong",delta:-4,fb:"Ответ пока не попадает в механизм. Не угадывай: вернись к вопросу и назови конкретный шаг/действие."}
+}
+function updateTopic(topic,q,a,res){
+ let t=state.topics[topic]||{title:topic,domain:"custom",baseline:0,mastery:10,confidence:50,attempts:0,errors:[],next:null,evidence:[]};
+ t.attempts++;t.mastery=Math.max(0,Math.min(100,t.mastery+res.delta));t.evidence.push({at:Date.now(),q,a,verdict:res.v});if(res.v==="wrong")t.errors=[...new Set([...t.errors,"Ошибка в последней попытке"])].slice(-3);state.topics[topic]=t;
+}
+function advanceDemo(){
+ let s=state.session;let st=demoLesson.steps[s.step];
+ if(st.type==="q"){s.step++;s.hint=0;s.revealed=false;st=demoLesson.steps[s.step];push("tutor",st.chunks.join("\n\n")+"\n\n"+st.q)}
+ else if(st.type==="explain"){s.step++;s.hint=0;s.revealed=false;st=demoLesson.steps[s.step]; if(st.type==="quiz"){s.quiz=0;push("tutor","Мини‑тест. Я засчитаю тему только по твоим ответам.\n\n"+st.questions[0].q)} else push("tutor",st.chunks.join("\n\n")+"\n\n"+st.q)}
+ else if(st.type==="quiz"){
+   if(s.quiz<st.questions.length-1){s.quiz++;push("tutor",st.questions[s.quiz].q)}
+   else {push("tutor",`Сессия завершена. Mastery сейчас ${avgMastery()}%. Ошибки отправлены в повторение. Следующая задача: попробуй объяснить цикл агента на одном своём реальном процессе.`);state.days[state.days.length-1].minutes+=12;state.streak++;s.done=true}
+ }
+}
+function submitAnswer(){
+ let box=document.getElementById("answerBox"),text=(box.value||"").trim();if(!text)return;box.value="";push("user",text);
+ if(state.mode==="do"){doMode(text);renderSession();return}
+ const s=state.session;
+ if(s.kind==="custom"){
+   s.answers++;push("tutor",s.answers===1?"Хорошо. Теперь выдели из своей задачи три вещи: 1) что нужно знать, 2) что нужно уметь сделать, 3) как поймём, что результат готов.":"Следующий шаг: выбери один пункт и примени его к исходной задаче. Я буду считать навык освоенным только после конкретного применения.","feedback");save();renderSession();return;
+ }
+ const st=demoLesson.steps[s.step],q=st.type==="quiz"?st.questions[s.quiz]:st;
+ let res=evalAnswer(text,q.keys);updateTopic(st.topic,q.q,text,res);s.answers++;push("tutor",res.fb,"feedback");
+ if(res.v==="correct"){setTimeout(()=>{advanceDemo();save();renderSession()},250)} else save();
+ renderSession();
+}
+function doMode(text){
+ const out=`Результат разобьём на 3 шага:\n1) Уточнить критерий «готово».\n2) Сделать минимальный рабочий вариант.\n3) Проверить по критериям и исправить.\n\nДля твоей задачи сейчас главное: сформулируй один измеримый результат в конце.`;
+ push("tutor",out);
+ push("tutor","Чему ты здесь научился: отделять действие от критерия готовности.\n\nТвоё действие: напиши одну строку «Готово, когда …».","feedback");
+}
+function hint(){
+ const s=state.session;if(!s)return;if(s.kind==="custom"){push("tutor","Намёк: не пытайся охватить всю тему. Назови один узкий пробел, который мешает решить задачу.");renderSession();return}
+ const st=demoLesson.steps[s.step],q=st.type==="quiz"?null:st;
+ if(st.type==="quiz"){push("tutor","Намёк: сначала восстанови общий цикл, а затем привяжи его к примеру.");renderSession();return}
+ const hs=q.hints||[];let i=Math.min(s.hint||0,hs.length-1);push("tutor",hs[i]||"Сузь вопрос до одного шага.");s.hint=i+1;save();renderSession()
+}
+function fullExplain(){
+ const s=state.session;if(s.kind==="custom"){push("tutor","Полный разбор включён: сначала строим карту знаний, затем маленькая практика и только потом финальный артефакт. Проверочный вопрос: какой результат будет доказательством, что задача решена?");renderSession();return}
+ const st=demoLesson.steps[s.step],q=st.type==="quiz"?st.questions[s.quiz]:st;push("tutor","Разбор:\n"+q.answer+"\n\nТеперь проверка: объясни то же самое своими словами на другом примере.");s.revealed=true;save();renderSession()
+}
+function otherExample(){
+ const s=state.session;if(s.kind==="demo"){const st=demoLesson.steps[s.step];push("tutor",st.alt||"Другой пример: чат объяснит, как искать поставщика. Агент сам пойдёт в источники, соберёт кандидатов, проверит критерии и вернёт подтверждённый список.")}else push("tutor","Другой пример: преврати свою задачу в цепочку «цель → шаг → проверка → следующий шаг».");renderSession()
+}
+function checkMe(){push("tutor","Проверка понимания — три уровня:\n1) Воспроизведение: назови механизм.\n2) Применение: покажи его на своей задаче.\n3) Перенос: где этот механизм не сработает и почему?");renderSession()}
+function renderReview(){
+ let due=state.cards.filter(c=>c.due<=Date.now());
+ let c=due[0]||state.cards[0];
+ document.getElementById("review").innerHTML=`<div class="hero"><div><div class="kicker">Spaced repetition</div><h1>Повторить</h1><p class="muted">Ошибка возвращает карточку ближе. Верный ответ растягивает интервал 1 → 3 → 7 → 14 дней.</p></div><span class="badge">${due.length} к повторению</span></div>
+ ${c?`<div class="card review-card"><span class="badge blue">${esc(c.title)}</span><h2 class="review-q" style="margin-top:14px">${esc(c.q)}</h2><div class="field"><textarea id="reviewAnswer" placeholder="Ответь до раскрытия…"></textarea></div><div class="actions" style="margin-top:10px"><button class="btn" onclick="revealReview()">Показать ответ</button><button class="btn primary" onclick="gradeReview(true)">Знаю</button><button class="btn danger" onclick="gradeReview(false)">Ошибка</button></div><div id="reviewReveal"></div></div>`:`<div class="card">На сегодня всё повторено.</div>`}`
+}
+function revealReview(){let c=state.cards.find(x=>x.due<=Date.now())||state.cards[0];document.getElementById("reviewReveal").innerHTML=`<div class="reveal">${esc(c.answer)}</div>`}
+function gradeReview(ok){
+ let idx=state.cards.findIndex(x=>x.due<=Date.now());if(idx<0)idx=0;let c=state.cards[idx];if(!c)return;
+ const ints=[1,3,7,14];c.interval=ok?Math.min(3,c.interval+1):0;c.due=Date.now()+ints[c.interval]*86400000;
+ let t=state.topics[c.topic];if(t)t.mastery=Math.max(0,Math.min(100,t.mastery+(ok?8:-3)));save();toast(ok?"Интервал увеличен":"Вернём карточку завтра");renderReview()
+}
+function renderKnowledge(){
+ let rows=Object.entries(state.topics).sort((a,b)=>b[1].mastery-a[1].mastery).map(([id,t])=>`<div class="tr"><div><b>${esc(t.title)}</b><div class="muted tiny">${esc(t.errors?.[0]||"Ошибок не зафиксировано")}</div></div><div>${t.mastery}%</div><div>${t.confidence}%</div><div>${t.evidence?.length||0} доказ.</div></div>`).join("");
+ document.getElementById("knowledge").innerHTML=`<div class="hero"><div><div class="kicker">Evidence‑based mastery</div><h1>Карта знаний</h1><p class="muted">«Пройдено» не считается. Считаются ответы, применение и перенос.</p></div></div><div class="card"><div class="table"><div class="tr head"><div>Тема</div><div>Mastery</div><div>Уверенность</div><div>Evidence</div></div>${rows}</div></div>`
+}
+function renderSettings(){
+ document.getElementById("settings").innerHTML=`<div class="hero"><div><div class="kicker">Профиль</div><h1>Настройки</h1></div></div><div class="grid g2">
+ <div class="card"><div class="field"><label>Главная цель</label><input id="sg" value="${esc(state.profile.goal)}"></div><div class="field" style="margin-top:12px"><label>Зачем</label><input id="sw" value="${esc(state.profile.why)}"></div><div class="field" style="margin-top:12px"><label>Минут в день</label><input id="sm" type="number" min="5" max="120" value="${state.profile.minutes}"></div><button class="btn primary" style="margin-top:12px" onclick="saveSettings()">Сохранить</button></div>
+ <div class="card"><h3>Режим данных</h3><p class="muted">Этот MVP работает локально: прогресс хранится в localStorage браузера. Внешний ИИ не подключён, поэтому демо‑движок не отправляет данные наружу.</p><div class="actions"><button class="btn" onclick="toggleTheme()">Сменить тему</button><button class="btn danger" onclick="resetAll()">Сбросить прогресс</button></div></div></div>`
+}
+function saveSettings(){state.profile.goal=document.getElementById("sg").value;state.profile.why=document.getElementById("sw").value;state.profile.minutes=+document.getElementById("sm").value||20;save();toast("Сохранено")}
+function toggleTheme(){state.theme=state.theme==="dark"?"light":"dark";save();setTheme()}
+function resetAll(){if(confirm("Сбросить весь локальный прогресс?")){state=defaultState();save();setTheme();showOnboarding();renderAll()}}
+let obStep=0,ob={goal:"",why:"",level:5,minutes:20,style:"mixed"};
+const obData=[
+ ["Чему хочешь научиться сейчас?","goal","Например: AI‑агенты, продажи, системное мышление"],
+ ["Зачем тебе это?","why","Какой реальный результат это должно дать?"],
+ ["Текущий уровень 0–10","level","5"],
+ ["Сколько минут сегодня?","minutes","20"],
+ ["Как тебе удобнее учиться?","style",""]
+];
+function showOnboarding(){obStep=0;document.getElementById("onboard").classList.add("show");renderOnboard()}
+function renderOnboard(){
+ let [title,key,ph]=obData[obStep],dots=obData.map((_,i)=>`<i class="dot ${i<=obStep?"on":""}"></i>`).join("");
+ let control=key==="style"?`<div class="actions">${[["examples","Примеры"],["questions","Вопросы"],["practice","Практика"],["mixed","Смешанный"]].map(([v,t])=>`<button class="btn ${ob.style===v?"primary":""}" onclick="ob.style='${v}';renderOnboard()">${t}</button>`).join("")}</div>`:`<div class="field"><input id="obInput" ${key==="level"||key==="minutes"?'type="number"':''} placeholder="${ph}" value="${esc(String(ob[key]??""))}"></div>`;
+ document.getElementById("onboardCard").innerHTML=`<div class="stepdots">${dots}</div><div class="kicker">Настройка тьютора · ${obStep+1}/5</div><h2>${title}</h2>${control}<div class="actions" style="margin-top:18px"><button class="btn ghost" onclick="skipOnboard()">Демо без настройки</button><button class="btn primary" onclick="nextOnboard()">${obStep===4?"Готово":"Дальше →"}</button></div>`;
+}
+function nextOnboard(){
+ let key=obData[obStep][1],inp=document.getElementById("obInput");if(inp)ob[key]=(key==="level"||key==="minutes")?Number(inp.value):inp.value;
+ if(obStep<4){obStep++;renderOnboard()}else{state.profile={onboarded:true,...ob};save();document.getElementById("onboard").classList.remove("show");renderAll();toast("Тьютор настроен")}
+}
+function skipOnboard(){state.profile.onboarded=true;save();document.getElementById("onboard").classList.remove("show");renderAll()}
+function renderAll(){renderNav();renderDashboard();renderSession();renderReview();renderKnowledge();renderSettings();navTo(state.screen||"dashboard")}
+setTheme();renderAll();if(!state.profile.onboarded)showOnboarding();
+</script>
+</body>
+</html>
